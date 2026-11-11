@@ -194,7 +194,8 @@
     errorBox.classList.remove("hidden");
   }
 
-  function createMediaCard(item, index) {
+  
+    function createMediaCard(item, index) {
     const card = document.createElement("div");
     card.className = "bg-[#241d2c] border border-white/10 rounded-2xl p-4";
 
@@ -202,12 +203,12 @@
     row.className = "flex gap-4 items-center";
 
     if (item.thumbnail) {
-      const image = document.createElement("img");
-      image.src = item.thumbnail;
-      image.alt = "Media preview";
-      image.loading = "lazy";
-      image.className = "w-24 h-28 object-cover rounded-xl bg-black";
-      row.appendChild(image);
+        const image = document.createElement("img");
+        image.src = item.thumbnail;
+        image.alt = "Media preview";
+        image.loading = "lazy";
+        image.className = "w-24 h-28 object-cover rounded-xl bg-black";
+        row.appendChild(image);
     }
 
     const info = document.createElement("div");
@@ -225,23 +226,71 @@
     row.appendChild(info);
     card.appendChild(row);
 
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "w-full mt-4 py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400";
-    button.textContent = "⬇ Download " + (item.quality || item.type || "Media");
+    function startDownload() {
+        const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(item.url)}`;
+        const link = document.createElement("a");
+        link.href = proxyUrl;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
 
-    button.addEventListener("click", () => {
-      const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(item.url)}`;
-      const link = document.createElement("a");
-      link.href = proxyUrl;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+    // HD Download Button
+    const hdButton = document.createElement("button");
+    hdButton.type = "button";
+    hdButton.className = "w-full mt-4 py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white";
+    hdButton.innerHTML = `
+        <div>🌟 Download HD Video</div>
+        <div class="text-xs font-normal mt-1">Watch 15 seconds ad</div>
+    `;
+
+    hdButton.addEventListener("click", () => {
+        let countdown = 15;
+
+        hdButton.disabled = true;
+        hdButton.classList.add("opacity-70", "cursor-not-allowed");
+        hdButton.textContent = `Please wait ${countdown} seconds...`;
+
+        const timer = setInterval(() => {
+        countdown--;
+
+        if (countdown > 0) {
+            hdButton.textContent = `Please wait ${countdown} seconds...`;
+        } else {
+            clearInterval(timer);
+            hdButton.textContent = "Starting download...";
+
+            startDownload();
+
+            setTimeout(() => {
+            hdButton.disabled = false;
+            hdButton.classList.remove("opacity-70", "cursor-not-allowed");
+            hdButton.innerHTML = `
+                <div>🌟 Download HD Video</div>
+                <div class="text-xs font-normal mt-1">Watch 15 seconds ad</div>
+            `;
+            }, 2000);
+        }
+        }, 1000);
     });
 
-    card.appendChild(button);
+    card.appendChild(hdButton);
+
+    // 720p Download Button
+    const p720Button = document.createElement("button");
+    p720Button.type = "button";
+    p720Button.className = "w-full mt-3 py-3 rounded-xl font-bold text-sm bg-[#34303b] border border-white/10 hover:bg-[#443b4d] text-white";
+    p720Button.textContent = "⚡ Download 720p";
+
+    p720Button.addEventListener("click", () => {
+        startDownload();
+    });
+
+    card.appendChild(p720Button);
+
     return card;
-  }
+    }
+
 
   async function fetchMedia() {
     const instagramUrl = input.value.trim();
