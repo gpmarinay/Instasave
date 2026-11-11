@@ -160,6 +160,43 @@
   <p class="mt-2 px-4">Only download content you own or have permission to use.</p>
 </footer>
 
+<!-- HD DOWNLOAD AD MODAL -->
+<div id="ad-modal" class="hidden fixed inset-0 bg-[#100b16]/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+  <div class="bg-[#241d2c] border border-white/10 w-full max-w-xs p-6 rounded-2xl shadow-2xl text-center flex flex-col items-center">
+
+    <div class="bg-purple-500/20 text-purple-400 p-3 rounded-full mb-3 border border-purple-500/30">
+      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+    </div>
+
+    <h3 class="text-base font-bold text-white mb-1">Unlocking HD Video</h3>
+
+    <p class="text-xs text-gray-400 mb-4">
+      Please wait 10 seconds while the sponsor ad displays...
+    </p>
+
+    <div class="w-full bg-[#17121d] border border-white/10 rounded-xl py-6 px-4 mb-4 text-xs text-gray-400 flex flex-col items-center justify-center gap-2">
+      <span class="animate-pulse text-pink-400 font-semibold">
+        ⚡ Loading HD Stream Sponsor Ad...
+      </span>
+      <span class="text-[11px] text-gray-500">
+        Your video will download automatically when the timer finishes.
+      </span>
+    </div>
+
+    <div class="text-xs font-bold text-purple-400 bg-purple-500/10 border border-purple-500/20 py-2 px-4 rounded-lg w-full mb-2">
+      HD Download starts in <span id="countdown-num">10</span>s...
+    </div>
+
+    <button onclick="closeAdModal()" class="text-xs text-gray-400 hover:text-white underline mt-1">
+      Cancel
+    </button>
+
+  </div>
+</div>
+
 <script>
   const input = document.getElementById("instagram-url");
   const errorBox = document.getElementById("error-msg");
@@ -195,6 +232,7 @@
   }
 
   
+    
     function createMediaCard(item, index) {
     const card = document.createElement("div");
     card.className = "bg-[#241d2c] border border-white/10 rounded-2xl p-4";
@@ -226,69 +264,91 @@
     row.appendChild(info);
     card.appendChild(row);
 
-    function startDownload() {
-        const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(item.url)}`;
-        const link = document.createElement("a");
-        link.href = proxyUrl;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-    }
-
     // HD Download Button
     const hdButton = document.createElement("button");
     hdButton.type = "button";
-    hdButton.className = "w-full mt-4 py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white";
-    hdButton.innerHTML = `
-        <div>🌟 Download HD Video</div>
-        <div class="text-xs font-normal mt-1">Watch 15 seconds ad</div>
-    `;
+    hdButton.className = "w-full mt-4 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white font-bold py-3.5 px-5 rounded-xl text-sm";
+    hdButton.textContent = "🌟 Download HD Video (Watch 10s Ad)";
 
     hdButton.addEventListener("click", () => {
-        let countdown = 15;
-
-        hdButton.disabled = true;
-        hdButton.classList.add("opacity-70", "cursor-not-allowed");
-        hdButton.textContent = `Please wait ${countdown} seconds...`;
-
-        const timer = setInterval(() => {
-        countdown--;
-
-        if (countdown > 0) {
-            hdButton.textContent = `Please wait ${countdown} seconds...`;
-        } else {
-            clearInterval(timer);
-            hdButton.textContent = "Starting download...";
-
-            startDownload();
-
-            setTimeout(() => {
-            hdButton.disabled = false;
-            hdButton.classList.remove("opacity-70", "cursor-not-allowed");
-            hdButton.innerHTML = `
-                <div>🌟 Download HD Video</div>
-                <div class="text-xs font-normal mt-1">Watch 15 seconds ad</div>
-            `;
-            }, 2000);
-        }
-        }, 1000);
+        startHdDownloadWithAd(item.url);
     });
 
     card.appendChild(hdButton);
 
-    // 720p Download Button
+    // 720p Direct Download Button
     const p720Button = document.createElement("button");
     p720Button.type = "button";
-    p720Button.className = "w-full mt-3 py-3 rounded-xl font-bold text-sm bg-[#34303b] border border-white/10 hover:bg-[#443b4d] text-white";
-    p720Button.textContent = "⚡ Download 720p";
+    p720Button.className = "w-full mt-3 bg-[#34303b] border border-white/10 text-white font-bold py-3 px-5 rounded-xl text-sm hover:bg-[#443b4d]";
+    p720Button.textContent = "⚡ Download 720p (Direct / No Ads)";
 
     p720Button.addEventListener("click", () => {
-        startDownload();
+        triggerDirectDownload(item.url, "720p");
     });
 
     card.appendChild(p720Button);
 
     return card;
+    }
+
+
+let countdownInterval = null;
+let pendingHdUrl = "";
+
+    function startHdDownloadWithAd(mediaUrl) {
+    if (!mediaUrl) return;
+
+    pendingHdUrl = mediaUrl;
+
+    const modal = document.getElementById("ad-modal");
+    const countdownElem = document.getElementById("countdown-num");
+
+    let timeLeft = 10;
+
+    clearInterval(countdownInterval);
+
+    countdownElem.textContent = timeLeft;
+    modal.classList.remove("hidden");
+
+    countdownInterval = setInterval(() => {
+        timeLeft--;
+
+        countdownElem.textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+
+        const downloadUrl = pendingHdUrl;
+        pendingHdUrl = "";
+
+        closeAdModal();
+
+        triggerDirectDownload(downloadUrl, "HD");
+        }
+    }, 1000);
+    }
+
+    function closeAdModal() {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+    pendingHdUrl = "";
+
+    document.getElementById("ad-modal").classList.add("hidden");
+    }
+
+    function triggerDirectDownload(fileUrl, typeLabel) {
+    if (!fileUrl) return;
+
+    const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(fileUrl)}`;
+
+    const tempLink = document.createElement("a");
+    tempLink.href = proxyUrl;
+    tempLink.download = `instasave_${typeLabel.toLowerCase()}_${Date.now()}.mp4`;
+
+    document.body.appendChild(tempLink);
+    tempLink.click();
+    tempLink.remove();
     }
 
 
