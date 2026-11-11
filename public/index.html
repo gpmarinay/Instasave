@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#17121f">
+  <title>InstaSave - Instagram Downloader</title>
+  <meta name="description" content="Download Instagram videos, Reels, posts, and images with InstaSave.">
+  <link rel="icon" type="image/png" href="/logo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-[#17121f] text-white font-sans">
+
+<header class="sticky top-0 z-40 border-b border-white/10 bg-[#17121f]/90 backdrop-blur">
+  <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-orange-400 flex items-center justify-center font-black text-xl">
+        I
+      </div>
+      <span class="text-2xl font-black">
+        Insta<span class="text-pink-400">Save</span>
+      </span>
+    </a>
+    <span class="text-xs rounded-full px-3 py-1 bg-pink-500/10 text-pink-300 border border-pink-500/20">
+      Free Downloader
+    </span>
+  </div>
+</header>
+
+<main class="max-w-2xl mx-auto px-4 py-12">
+
+  <section class="text-center mb-8">
+    <div class="text-5xl mb-4">📸</div>
+    <h1 class="text-3xl sm:text-4xl font-extrabold mb-3">
+      Instagram Video Downloader
+    </h1>
+    <p class="text-gray-400 text-sm sm:text-base">
+      Download Instagram Reels, videos, and photos quickly and easily.
+    </p>
+  </section>
+
+  <section class="bg-[#241d2c] border border-white/10 rounded-2xl p-4 sm:p-5 shadow-2xl">
+
+    <div class="relative">
+      <input
+        id="instagram-url"
+        type="url"
+        placeholder="Paste Instagram link here..."
+        class="w-full bg-[#17121f] border border-white/10 rounded-xl py-4 pl-4 pr-32 text-sm focus:outline-none focus:border-pink-500"
+        oninput="toggleClearButton()"
+      >
+
+      <div class="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+        <button
+          id="clear-btn"
+          onclick="clearInput()"
+          class="hidden text-xs text-gray-300 px-2 py-2 rounded-lg bg-white/10">
+          ✕ Clear
+        </button>
+
+        <button
+          onclick="pasteClipboard()"
+          class="text-xs text-pink-300 px-3 py-2 rounded-lg bg-white/10">
+          📋 Paste
+        </button>
+      </div>
+    </div>
+
+    <button
+      id="download-btn"
+      onclick="fetchMedia()"
+      class="w-full mt-3 py-4 rounded-xl font-extrabold text-white bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 hover:brightness-110 active:scale-[0.99] transition">
+      Download
+    </button>
+
+    <div id="error-msg" class="hidden mt-4 p-3 rounded-xl bg-red-950 border border-red-500/30 text-red-300 text-sm"></div>
+
+    <div id="loading" class="hidden mt-5 text-center text-pink-300 text-sm">
+      <div class="animate-spin w-6 h-6 border-2 border-pink-400 border-t-transparent rounded-full mx-auto mb-2"></div>
+      Processing your Instagram link...
+    </div>
+  </section>
+
+  <section id="result-box" class="hidden mt-6">
+    <h2 class="font-bold text-lg mb-3">Download Results</h2>
+    <div id="media-results" class="space-y-4"></div>
+  </section>
+
+  <!-- Fake Download Button: Add your own advertising link later -->
+  <div class="flex justify-center mt-8">
+    <button
+      type="button"
+      class="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white font-bold text-2xl px-20 py-3 rounded-3xl shadow-lg">
+      Download
+    </button>
+  </div>
+
+  <section class="mt-12 pt-8 border-t border-white/10">
+    <h2 class="text-xl font-bold text-center mb-6">How to Download</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+      <div class="bg-white/5 border border-white/5 p-4 rounded-xl">
+        <div class="text-2xl mb-2">🔗</div>
+        <h3 class="font-bold text-sm mb-1">1. Copy Link</h3>
+        <p class="text-xs text-gray-400">Copy the link of an Instagram Reel, post, or video.</p>
+      </div>
+
+      <div class="bg-white/5 border border-white/5 p-4 rounded-xl">
+        <div class="text-2xl mb-2">📋</div>
+        <h3 class="font-bold text-sm mb-1">2. Paste Link</h3>
+        <p class="text-xs text-gray-400">Paste your copied link into the input box above.</p>
+      </div>
+
+      <div class="bg-white/5 border border-white/5 p-4 rounded-xl">
+        <div class="text-2xl mb-2">⬇️</div>
+        <h3 class="font-bold text-sm mb-1">3. Download</h3>
+        <p class="text-xs text-gray-400">Choose your preferred media and save it to your device.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-10 pt-8 border-t border-white/10">
+    <h2 class="text-xl font-bold text-center mb-6">Frequently Asked Questions</h2>
+
+    <div class="space-y-3">
+      <div class="bg-white/5 p-4 rounded-xl">
+        <h3 class="font-bold text-sm mb-1">Is InstaSave free?</h3>
+        <p class="text-xs text-gray-400">InstaSave provides a free interface for processing supported Instagram links.</p>
+      </div>
+
+      <div class="bg-white/5 p-4 rounded-xl">
+        <h3 class="font-bold text-sm mb-1">Can I download Instagram Reels?</h3>
+        <p class="text-xs text-gray-400">Yes. Paste a supported public Instagram Reel link to retrieve available media.</p>
+      </div>
+
+      <div class="bg-white/5 p-4 rounded-xl">
+        <h3 class="font-bold text-sm mb-1">Do I need to log in?</h3>
+        <p class="text-xs text-gray-400">InstaSave does not ask for your Instagram password. Availability depends on the API and the media link.</p>
+      </div>
+
+      <div class="bg-white/5 p-4 rounded-xl">
+        <h3 class="font-bold text-sm mb-1">Does InstaSave store downloaded videos?</h3>
+        <p class="text-xs text-gray-400">InstaSave does not intentionally store downloaded media. Media retrieval is handled by the third-party API.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="mt-10 bg-[#100c16] border-t border-white/10 py-6 text-center text-xs text-gray-500">
+  <div class="flex justify-center gap-4 mb-3">
+    <a href="/privacy-policy.html" class="hover:text-pink-400">Privacy Policy</a>
+    <a href="/terms.html" class="hover:text-pink-400">Terms of Service</a>
+    <a href="/dmca.html" class="hover:text-pink-400">DMCA</a>
+  </div>
+  <p>© InstaSave. Instagram is a trademark of Meta Platforms, Inc.</p>
+  <p class="mt-1">InstaSave is not affiliated with or endorsed by Instagram or Meta.</p>
+  <p class="mt-2 px-4">Only download content you own or have permission to use.</p>
+</footer>
+
+<script>
+  const input = document.getElementById("instagram-url");
+  const errorBox = document.getElementById("error-msg");
+  const loading = document.getElementById("loading");
+  const resultBox = document.getElementById("result-box");
+  const results = document.getElementById("media-results");
+  const downloadButton = document.getElementById("download-btn");
+
+  function toggleClearButton() {
+    document.getElementById("clear-btn").classList.toggle("hidden", !input.value.trim());
+  }
+
+  function clearInput() {
+    input.value = "";
+    toggleClearButton();
+    input.focus();
+    errorBox.classList.add("hidden");
+    resultBox.classList.add("hidden");
+  }
+
+  async function pasteClipboard() {
+    try {
+      input.value = await navigator.clipboard.readText();
+      toggleClearButton();
+    } catch {
+      showError("Clipboard access was denied. Please paste your link manually.");
+    }
+  }
+
+  function showError(message) {
+    errorBox.textContent = message;
+    errorBox.classList.remove("hidden");
+  }
+
+  function createMediaCard(item, index) {
+    const card = document.createElement("div");
+    card.className = "bg-[#241d2c] border border-white/10 rounded-2xl p-4";
+
+    const row = document.createElement("div");
+    row.className = "flex gap-4 items-center";
+
+    if (item.thumbnail) {
+      const image = document.createElement("img");
+      image.src = item.thumbnail;
+      image.alt = "Media preview";
+      image.loading = "lazy";
+      image.className = "w-24 h-28 object-cover rounded-xl bg-black";
+      row.appendChild(image);
+    }
+
+    const info = document.createElement("div");
+    info.className = "flex-1 min-w-0";
+
+    const title = document.createElement("p");
+    title.className = "font-bold text-sm";
+    title.textContent = `Media ${index + 1}`;
+
+    const details = document.createElement("p");
+    details.className = "text-xs text-gray-400 mt-1";
+    details.textContent = `${item.type || "Media"} • ${item.quality || "Available"}`;
+
+    info.append(title, details);
+    row.appendChild(info);
+    card.appendChild(row);
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "w-full mt-4 py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400";
+    button.textContent = "⬇ Download " + (item.quality || item.type || "Media");
+
+    button.addEventListener("click", () => {
+      const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(item.url)}`;
+      const link = document.createElement("a");
+      link.href = proxyUrl;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    });
+
+    card.appendChild(button);
+    return card;
+  }
+
+  async function fetchMedia() {
+    const instagramUrl = input.value.trim();
+
+    errorBox.classList.add("hidden");
+    resultBox.classList.add("hidden");
+    results.replaceChildren();
+
+    if (!instagramUrl) {
+      showError("Please paste an Instagram link first.");
+      return;
+    }
+
+    downloadButton.disabled = true;
+    downloadButton.textContent = "Processing...";
+    loading.classList.remove("hidden");
+
+    try {
+      const response = await fetch(`/api/download?url=${encodeURIComponent(instagramUrl)}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to process this Instagram link.");
+      }
+
+      if (!Array.isArray(data.media) || data.media.length === 0) {
+        throw new Error("No downloadable media was found.");
+      }
+
+      data.media.forEach((item, index) => {
+        results.appendChild(createMediaCard(item, index));
+      });
+
+      resultBox.classList.remove("hidden");
+    } catch (error) {
+      showError(error.message || "Something went wrong. Please try again.");
+    } finally {
+      loading.classList.add("hidden");
+      downloadButton.disabled = false;
+      downloadButton.textContent = "Download";
+    }
+  }
+
+  input.addEventListener("keydown", event => {
+    if (event.key === "Enter") fetchMedia();
+  });
+</script>
+
+</body>
+</html>
